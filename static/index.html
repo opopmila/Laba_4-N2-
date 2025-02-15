@@ -4,28 +4,164 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="../static/styles.css">
     <title>User Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            padding: 10px 100px;
+            display: flex;
+            flex-direction: column;
+            background-color: #dbdbdb;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        h2 {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .header .hd-info {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .header .hd-info h2 {
+            margin-bottom: 0;
+        }
+
+        .creat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 20px;
+            margin: auto;
+        }
+
+        .creat .form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 40px 50px;
+            width: 450px;
+        }
+
+        .creat .form input {
+            font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+            width: 350px;
+            padding: 10px;
+            border: 1px #bbb solid;
+            border-radius: 5px;
+        }
+
+        .creat .form button {
+            font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+            width: 350px;
+            padding: 10px;
+            border: 1px #bbb solid;
+            border-radius: 5px;
+            transition: 0.3s all ease-in;
+        }
+
+        .creat .form button:hover {
+            background-color: #fff;
+        }
+
+        .creat h2 {
+            margin-bottom: 0;
+        }
+
+        .creat .list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 40px 50px;
+            width: 450px;
+        }
+
+        .btn {
+            font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+            width: 350px;
+            padding: 10px;
+            border: 1px #bbb solid;
+            border-radius: 5px;
+            transition: 0.3s all ease-in;
+        }
+
+        .btn:hover {
+            background-color: #fff;
+        }
+
+        .btn2 {
+            font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+            width: 100px;
+            padding: 10px;
+            border: 1px #bbb solid;
+            border-radius: 5px;
+            transition: 0.3s all ease-in;
+        }
+
+        .btn2:hover {
+            background-color: #fff;
+        }
+
+        .creat .form .user-info-display {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+        }
+
+        .creat .form .user-info p {
+            margin: 0.5rem 0;
+        }
+
+        .creat .form .error {
+            color: #dc3545;
+            font-weight: bold;
+        }
+    </style>
 </head>
 
 <body>
-    <h1>User Management</h1>
 
     <!-- Раздел статуса логина -->
-    <div class="creat">
-        <h2>Login Status</h2>
-        <div class="form">
+    <div class="header">
+        <h1>User Management</h1>
+        <div class="hd-info">
+            <h2>Login Status</h2>
             <p id="login-status">Not logged in</p>
-            <button id="logout-button" style="display: none;">Logout</button>
+            <button id="logout-button" style="display: none;" class="btn2">Logout</button>
         </div>
-    </div>
-
-    <!-- Раздел для отображения списка пользователей -->
-    <div class="creat">
-        <!-- Заголовок для списка пользователей -->
-        <h2>Users</h2>
-        <!-- Ненумерованный список, в который будет добавлен список пользователей -->
-        <ul id="user-list"></ul>
     </div>
 
     <!-- Раздел для авторизации пользователя -->
@@ -38,7 +174,15 @@
         </form>
         <p id="status"></p>
     </div>
+
     <div id="authenticated-content" style="display: none;" class="creat">
+        <!-- Раздел для отображения списка пользователей -->
+        <div class="creat">
+            <!-- Заголовок для списка пользователей -->
+            <h2>Users</h2>
+            <!-- Ненумерованный список, в который будет добавлен список пользователей -->
+            <ul id="user-list" class="list"></ul>
+        </div>
         <!-- Раздел для создания нового пользователя -->
         <div class="creat">
             <h2>Create User</h2>
@@ -79,9 +223,9 @@
         <!-- Раздел для получения личных данных пользователя -->
         <div class="creat">
             <h2>Get User Info</h2>
+            <button class="btn" id="get-user-info">Get My Info</button>
             <form class="form">
-                <button id="get-user-info">Get My Info</button>
-                <pre id="userInfo"></pre>
+                <div id="userInfo" class="user-info-display"></div>
             </form>
         </div>
     </div>
@@ -99,6 +243,8 @@
             document.getElementById('logout-button').style.display = isLoggedIn ? 'block' : 'none';
             if (isLoggedIn) {
                 fetchUsers().catch(console.error);
+            } else {
+                document.getElementById("user-list").innerHTML = "";
             }
         }
 
@@ -107,10 +253,10 @@
                 accessToken = null;
                 localStorage.removeItem('accessToken');
                 updateUIState();
-                throw new Error('Authentication failed. Please log in again.');
+                throw new Error('Не удалось выполнить аутентификацию. Пожалуйста, войдите в систему еще раз.');
             }
             const error = await response.json();
-            throw new Error(error.detail || 'An error occurred');
+            throw new Error(error.detail || 'Произошла ошибка');
         }
 
         async function fetchUsers() {
@@ -133,7 +279,7 @@
                     userList.appendChild(li);
                 });
             } catch (error) {
-                console.error("Error fetching users:", error);
+                console.error("Ошибка при выборке пользователей:", error);
                 alert(error.message);
             }
         }
@@ -156,16 +302,16 @@
                     },
                     body: JSON.stringify(formData)
                 });
-
                 if (!response.ok) {
                     await handleApiError(response);
                     return;
                 }
-                alert("User created successfully");
+
+                alert("Пользователь успешно создан");
                 e.target.reset();
                 fetchUsers();
             } catch (error) {
-                console.error("Error creating user:", error);
+                console.error("Ошибка при создании пользователя:", error);
                 alert(error.message);
             }
         });
@@ -193,11 +339,11 @@
                     await handleApiError(response);
                     return;
                 }
-                alert("User updated successfully");
+                alert("Пользователь успешно обновился");
                 e.target.reset();
                 fetchUsers();
             } catch (error) {
-                console.error("Error updating user:", error);
+                console.error("Ошибка при обновлении пользователя:", error);
                 alert(error.message);
             }
         });
@@ -217,11 +363,11 @@
                     await handleApiError(response);
                     return;
                 }
-                alert("User deleted successfully");
+                alert("Пользователь успешно удален");
                 e.target.reset();
                 fetchUsers();
             } catch (error) {
-                console.error("Error deleting user:", error);
+                console.error("Ошибка при удалении пользователя:", error);
                 alert(error.message);
             }
         });
@@ -245,7 +391,7 @@
                 });
                 if (!response.ok) {
                     const error = await response.json();
-                    throw new Error(error.detail || 'Login failed');
+                    throw new Error(error.detail || 'Ошибка входа');
                 }
                 const data = await response.json();
                 accessToken = data.access_token;
@@ -253,40 +399,54 @@
                 updateUIState();
                 event.target.reset();
             } catch (error) {
-                console.error("Login error:", error);
+                console.error("Ошибка входа в систему:", error);
                 alert(error.message);
             }
         });
 
+        // Маршрут для выхода пользователя
         document.getElementById("logout-button").addEventListener("click", () => {
             accessToken = null;
             localStorage.removeItem('accessToken');
             updateUIState();
         });
 
-        // Остальные методы, которые будут в задании, дописываем по аналогии
         async function getUserInfo() {
             try {
+                if (!accessToken) {
+                    throw new Error('Please log in first');
+                }
                 const response = await fetch(`${apiBaseUrl}/users/me`, {
                     method: 'GET',
-                    headers: { 'Authorization': `Bearer ${accessToken}` }
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Accept': 'application/json'
+                    }
                 });
                 if (!response.ok) {
                     await handleApiError(response);
                     return;
                 }
                 const data = await response.json();
-                document.getElementById('userInfo').textContent = JSON.stringify(data, null, 2);
+                const userInfoElement = document.getElementById('userInfo');
+                userInfoElement.innerHTML = `
+                    <div class="user-info">
+                        <p><strong>Username:</strong> ${data.username}</p>
+                        <p><strong>Email:</strong> ${data.email}</p>
+                        <p><strong>Full Name:</strong> ${data.full_name || 'Not provided'}</p>
+                        <p><strong>ID:</strong> ${data.id}</p>
+                    </div>
+                `;
             } catch (error) {
-                console.error("Error fetching user info:", error);
-                alert(error.message);
+                console.error("Ошибка при получении информации о пользователе:", error);
+                document.getElementById('userInfo').innerHTML = `<p class="error">${error.message}</p>`;
             }
         }
 
         document.getElementById("get-user-info").addEventListener("click", getUserInfo);
 
         // При загрузке страницы выполняем начальное получение списка пользователей
-        pdateUIState();
+        updateUIState();
     </script>
 </body>
 

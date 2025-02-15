@@ -1,6 +1,6 @@
 from typing import Annotated
 from fastapi import FastAPI, HTTPException, Depends, status
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from sqlalchemy import create_engine, Column, Integer, String, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
@@ -62,13 +62,13 @@ Base.metadata.create_all(bind=engine)
 # Определение Pydantic модели для пользователя
 class UserCreate(BaseModel):
     username: str
-    email: str
+    email: EmailStr
     full_name: str | None = None
     password: str
 
 class UserUpdate(BaseModel):
     username: str | None = None
-    email: str | None = None
+    email: EmailStr | None = None
     full_name: str | None = None
     password: str | None = None
     disabled: bool | None = None
@@ -76,7 +76,7 @@ class UserUpdate(BaseModel):
 class UserResponse(BaseModel):
     id: int
     username: str
-    email: str
+    email: EmailStr
     full_name: str | None = None
     disabled: bool | None = None
     class Config:
@@ -132,7 +132,7 @@ def get_user_by_username(db: Session, username: str):
     return db.query(User).filter(User.username == username).first()
 
 # Функция получения текущего пользователя по токену
-async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(get_db)):
+def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(get_db)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -183,7 +183,7 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
 
 # Маршрут для получения токена
 @app.post("/token", response_model=Token)
-async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = authenticate_user(db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
@@ -199,7 +199,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 
 # Маршрут для получения данных текущего пользователя
 @app.get("/users/me", response_model=UserResponse)
-async def read_users_me(current_user: Annotated[User, Depends(get_current_user)]):
+def read_users_me(current_user: Annotated[User, Depends(get_current_user)]):
     return current_user
 
 # Маршрут для получения пользователя по ID
@@ -216,7 +216,11 @@ def get_users(current_user: Annotated[User, Depends(get_current_user)], db: Sess
     users = db.query(User).all()
     if not users:
         raise HTTPException(status_code=404, detail="Users not found")
-    return users
+    try:
+        return [UserResponse.model_validate(user) for user in users]
+    except Exception as e:
+        logger.error(f"Validation error: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 # Маршрут для удаления пользователя по ID
 @app.delete("/users/{user_id}", response_model=UserResponse)
@@ -234,6 +238,10 @@ def update_user(user_id: int, current_user: Annotated[User, Depends(get_current_
     user = db.query(User).filter(User.id == user_id).first()
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
+    if user_update.email and user_update.email != user.email:
+        existing_user = db.query(User).filter(User.email == user_update.email).first()
+        if existing_user:
+            raise HTTPException(status_code=400, detail="Email already registered")
     if user_update.username:
         user.username = user_update.username
     if user_update.email:
@@ -251,3 +259,8 @@ def update_user(user_id: int, current_user: Annotated[User, Depends(get_current_
     except IntegrityError:
         db.rollback()
         raise HTTPException(status_code=400, detail="Email already registered")
+
+# Маршрут для тестирования
+@app.get("/test/")
+def test_route():
+    return {"message": "Test route is working"}
